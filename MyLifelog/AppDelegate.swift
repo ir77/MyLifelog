@@ -16,7 +16,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
+        //Notification登録前のおまじない。テストの為、現在のノーティフケーションを削除します
+        UIApplication.sharedApplication().cancelAllLocalNotifications()
+        //Notification登録前のおまじない。これがないとpermissionエラーが発生するので必要です。
+        application.registerUserNotificationSettings(UIUserNotificationSettings(forTypes: UIUserNotificationType.Sound | UIUserNotificationType.Alert | UIUserNotificationType.Badge, categories: nil))
         return true
+    }
+    
+    func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
+        let now = NSDate()
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy/MM/dd HH:mm:ss"
+        let string = formatter.stringFromDate(now)
+        println(string)
+        
+        // バッジの数をインクリメント
+        UIApplication.sharedApplication().applicationIconBadgeNumber++
+        
+        //以下で登録処理
+        var localNotification : UILocalNotification = UILocalNotification()
+        localNotification.alertAction = "OK"
+        var brightness = UIScreen.mainScreen().brightness
+        // localNotification.alertBody = "Called application:performFetchWithCompletionHandler:"
+        localNotification.alertBody = "brightness -> "+brightness.description
+        localNotification.fireDate = NSDate() // NSDate date // NSDate(timeIntervalSinceNow: 5);//５秒後
+        localNotification.timeZone = NSTimeZone.defaultTimeZone() // localTimeZone
+        localNotification.soundName = UILocalNotificationDefaultSoundName;
+        UIApplication.sharedApplication().scheduleLocalNotification(localNotification);
+
+        // ダウンロード完了
+        // completionHandler(UIBackgroundFetchResultNoData);
+        completionHandler(UIBackgroundFetchResult.NewData)
     }
 
     func applicationWillResignActive(application: UIApplication) {
@@ -31,6 +62,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+        // バッジの数をリセット
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
     }
 
     func applicationDidBecomeActive(application: UIApplication) {

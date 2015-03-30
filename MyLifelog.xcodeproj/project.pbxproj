@@ -161,6 +161,11 @@
 				TargetAttributes = {
 					B1454F271AC0386300EEEB2A = {
 						CreatedOnToolsVersion = 6.2;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					B1454F3C1AC0386300EEEB2A = {
 						CreatedOnToolsVersion = 6.2;
@@ -405,6 +410,7 @@
 				B1454F491AC0386300EEEB2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B1454F4A1AC0386300EEEB2A /* Build configuration list for PBXNativeTarget "MyLifelogTests" */ = {
 			isa = XCConfigurationList;
@@ -413,6 +419,7 @@
 				B1454F4C1AC0386300EEEB2A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
