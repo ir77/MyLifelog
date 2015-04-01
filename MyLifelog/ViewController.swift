@@ -14,7 +14,6 @@ import Parse
 class ViewController: UIViewController, CLLocationManagerDelegate {
 
     @IBOutlet weak var myLabel: UILabel!
-    var myMotionManager: CMMotionManager!
     var locManager: CLLocationManager?
     
     override func viewDidLoad() {
@@ -53,21 +52,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         self.locManager!.requestAlwaysAuthorization();
         self.locManager!.pausesLocationUpdatesAutomatically = false;
         self.locManager!.startUpdatingLocation()
-        
-        // MotionManagerを生成.
-        myMotionManager = CMMotionManager()
-        
-        // 更新周期を設定.
-        myMotionManager.accelerometerUpdateInterval = 0.5
-        
-        // 加速度の取得を開始.
-        myMotionManager.startAccelerometerUpdatesToQueue(NSOperationQueue.mainQueue(), withHandler: {(accelerometerData:CMAccelerometerData!, error:NSError!) -> Void in
-            println(accelerometerData.acceleration.x)
-        })
     }
     
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
         println(newLocation.timestamp)
+        var brightness = UIScreen.mainScreen().brightness
+        println(brightness.description)
     }
     
     func screenBrightnessDidChange(notification:NSNotification){
