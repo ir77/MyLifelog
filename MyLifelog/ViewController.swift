@@ -9,6 +9,7 @@
 import UIKit
 import CoreMotion
 import CoreLocation
+import Parse
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
 
@@ -23,6 +24,24 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
         self.myLabel.text = brightness.description
         self.setupLocationManager()
+        self.setupParse()
+    }
+    
+    func setupParse () {
+        var myDict: NSDictionary?
+        if let path = NSBundle.mainBundle().pathForResource("private", ofType: "plist") {
+            myDict = NSDictionary(contentsOfFile: path)
+        }
+        if let dict = myDict {
+            let applicationId = dict["applicationId"] as String
+            let clientKey = dict["clientKey"] as String
+            Parse.enableLocalDatastore()
+            Parse.setApplicationId(applicationId, clientKey: clientKey)
+            
+            let testObject = PFObject(className: "TestObject")
+            testObject["foo"] = "bar"
+            testObject.save()
+        }
     }
     
     func setupLocationManager () {
@@ -55,7 +74,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         var screen : UIScreen = notification.object as UIScreen
         self.myLabel.text = screen.brightness.description
     }
-    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
