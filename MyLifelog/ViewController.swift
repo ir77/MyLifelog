@@ -40,19 +40,29 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         self.myLabel.text = "\(screen.brightness)"
     }
 
-    func checkBrightnessChange () -> Bool {
+    func checkBrightnessChange () {
         let count = ParseData.brightnessDict.count
         let brightnessStr = ParseData.brightnessDict[count-1]["brightness"]
-        let brightnessNumber = NSNumberFormatter().numberFromString(brightnessStr!)
-        let brightnessCGFloat = CGFloat(brightnessNumber!)
-
-        let brightnessDiff =  abs(brightnessCGFloat - UIScreen.mainScreen().brightness)
+        let brightnessDiff =  abs(getCGFloatFromString(brightnessStr!) - UIScreen.mainScreen().brightness)
         if (brightnessDiff >= 0.1) {
             ParseData.brightnessDict.append(self.getBrightnessDict())
             println(ParseData.brightnessDict)
-            return true
+        } else if brightnessDiff < 0.1 {
+            if (ParseData.brightnessDict.count >= 2) {
+                let brightnessStr2 = ParseData.brightnessDict[count-2]["brightness"]
+                let brightnessDiff2 =  abs(getCGFloatFromString(brightnessStr2!) - UIScreen.mainScreen().brightness)
+                if brightnessDiff2 < 0.1 {
+                    ParseData.brightnessDict[count-1]["localtime"] = getNowDate()
+                    println(ParseData.brightnessDict)
+                } else {
+                    ParseData.brightnessDict.append(self.getBrightnessDict())
+                    println(ParseData.brightnessDict)
+                }
+            } else {
+                ParseData.brightnessDict.append(self.getBrightnessDict())
+                println(ParseData.brightnessDict)
+            }
         }
-        return false
     }
     
     // MARK: - Location
@@ -67,9 +77,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         self.locManager!.startUpdatingLocation()
     }
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
-        if checkBrightnessChange() {
+        println(getNowDate())
+        checkBrightnessChange()
+        if ParseData.brightnessDict.count >= 10 {
+            println(ParseData.brightnessDict)
             ParseData.parseObject.saveBrightnessDataInParse(ParseData.brightnessDict)
         }
+    }
+    
+    func getCGFloatFromString (str : String) -> CGFloat {
+        return CGFloat(NSNumberFormatter().numberFromString(str)!)
     }
     
     func getBrightnessDict () -> Dictionary<String, String> {
@@ -83,7 +100,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         dateFormatter.locale = NSLocale(localeIdentifier: "ja_JP") // ロケールの設定
         dateFormatter.timeStyle = .LongStyle
         dateFormatter.dateStyle = .LongStyle
-        println(dateFormatter.stringFromDate(now)) // -> 2014年6月24日 11:14:17 JST
         return dateFormatter.stringFromDate(now)
     }
     

@@ -14,7 +14,7 @@ protocol MyParseDelegate {
 
 class MyParse {
     var delegate: MyParseDelegate!
-
+    
     init () {
         var myDict: NSDictionary?
         if let path = NSBundle.mainBundle().pathForResource("private", ofType: "plist") {
@@ -29,25 +29,23 @@ class MyParse {
     }
     
     func saveBrightnessDataInParse (brightnessDict:[Dictionary<String, String>]) {
-        if (brightnessDict.count >= 1) {
-            var objects : [PFObject] = []
-            for var i=0; i<brightnessDict.count; i++ {
-                let pfObject : PFObject = PFObject(className: "TestObject")
-                pfObject["brightness"] = brightnessDict[i]["brightness"]
-                pfObject["localtime"] = brightnessDict[i]["localtime"]
-                objects.append(pfObject)
-            }
-            PFObject.saveAllInBackground(objects, block: {
-                (success: Bool, error: NSError!) -> Void in
-                if (success) {
-                    // The object has been saved.
-                    println("success")
-                    self.delegate.saveBackgroundSuccess()
-                } else {
-                    // There was a problem, check error.description
-                    println(error.description)
-                }
-            })
+        var objects : [PFObject] = []
+        for var i=0; i<brightnessDict.count; i++ {
+            let pfObject : PFObject = PFObject(className: "TestObject")
+            pfObject["brightness"] = brightnessDict[i]["brightness"]
+            pfObject["localtime"] = brightnessDict[i]["localtime"]
+            objects.append(pfObject)
         }
+        PFObject.saveAllInBackground(objects, block: {
+            (success: Bool, error: NSError!) -> Void in
+            if (success) {
+                // The object has been saved.
+                println("success")
+                self.delegate.saveBackgroundSuccess()
+            } else {
+                // There was a problem, check error.description
+                println(error.description)
+            }
+        })
     }
 }
