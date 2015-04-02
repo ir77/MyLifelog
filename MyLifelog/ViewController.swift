@@ -30,7 +30,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         var brightness = UIScreen.mainScreen().brightness
         ParseData.preBrightness = brightness
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
-        self.myLabel.text = brightness.description
+        self.myLabel.text = "\(brightness)"
         setupParse()
         ParseData.brightnessDict = []
 
@@ -38,7 +38,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     func screenBrightnessDidChange(notification:NSNotification){
         var screen : UIScreen = notification.object as UIScreen
-        self.myLabel.text = screen.brightness.description
+        self.myLabel.text = "\(screen.brightness)"
     }
 
     // MARK: - Parse
@@ -61,24 +61,13 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             return
         }
         
-        if (ParseData.brightnessDict.count >= 10) {
+        if (ParseData.brightnessDict.count >= 1) {
             var objects : [PFObject] = []
             for var i=0; i<ParseData.brightnessDict.count; i++ {
                 let pfObject : PFObject = PFObject(className: "TestObject")
                 pfObject["brightness"] = ParseData.brightnessDict[i]["brightness"]
                 pfObject["localtime"] = ParseData.brightnessDict[i]["localtime"]
                 objects.append(pfObject)
-                /*
-                testObject.saveInBackgroundWithBlock {
-                    (success: Bool, error: NSError!) -> Void in
-                    if (success) {
-                        // The object has been saved.
-                        println("success")
-                    } else {
-                        // There was a problem, check error.description
-                        println("error")
-                    }
-                }*/
             }
             PFObject.saveAllInBackground(objects, block: {
                 (success: Bool, error: NSError!) -> Void in
@@ -88,7 +77,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                     ParseData.brightnessDict = []
                 } else {
                     // There was a problem, check error.description
-                    println("error")
+                    println(error.description)
                 }
             })
         }
