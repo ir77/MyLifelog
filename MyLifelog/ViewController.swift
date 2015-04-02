@@ -11,10 +11,11 @@ import CoreMotion
 import CoreLocation
 import Parse
 
-struct ParseSetting {
+struct ParseData {
     static var applicationId : String!
     static var clientKey : String!
     static var preBrightness : CGFloat!
+    static var brightnessDict : [Dictionary<String, String>]!
 }
 
 class ViewController: UIViewController, CLLocationManagerDelegate {
@@ -27,10 +28,12 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         var brightness = UIScreen.mainScreen().brightness
-        ParseSetting.preBrightness = brightness
+        ParseData.preBrightness = brightness
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
         self.myLabel.text = brightness.description
         setupParse()
+        ParseData.brightnessDict = []
+
         self.setupLocationManager()
     }
     func screenBrightnessDidChange(notification:NSNotification){
@@ -45,10 +48,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             myDict = NSDictionary(contentsOfFile: path)
         }
         if let dict = myDict {
-            ParseSetting.applicationId = dict["applicationId"] as String
-            ParseSetting.clientKey = dict["clientKey"] as String
+            ParseData.applicationId = dict["applicationId"] as String
+            ParseData.clientKey = dict["clientKey"] as String
             Parse.enableLocalDatastore()
-            Parse.setApplicationId(ParseSetting.applicationId, clientKey: ParseSetting.clientKey)
+            Parse.setApplicationId(ParseData.applicationId, clientKey: ParseData.clientKey)
             return true
         }
         return false
@@ -57,23 +60,52 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         if !checkBrightnessChange() {
             return
         }
-        let testObject = PFObject(className: "TestObject")
-        testObject["foo"] = UIScreen.mainScreen().brightness.description
-        testObject.saveInBackgroundWithBlock {
-            (success: Bool, error: NSError!) -> Void in
-            if (success) {
-                // The object has been saved.
-                println("success")
-            } else {
-                // There was a problem, check error.description
-                println("error")
+        
+        if (ParseData.brightnessDict.count >= 10) {
+            var objects : [PFObject] = []
+            for var i=0; i<ParseData.brightnessDict.count; i++ {
+                let pfObject : PFObject = PFObject(className: "TestObject")
+                pfObject["brightness"] = ParseData.brightnessDict[i]["brightness"]
+                pfObject["localtime"] = ParseData.brightnessDict[i]["localtime"]
+                objects.append(pfObject)
+                /*
+                testObject.saveInBackgroundWithBlock {
+                    (success: Bool, error: NSError!) -> Void in
+                    if (success) {
+                        // The object has been saved.
+                        println("success")
+                    } else {
+                        // There was a problem, check error.description
+                        println("error")
+                    }
+                }*/
             }
+            PFObject.saveAllInBackground(objects, block: {
+                (success: Bool, error: NSError!) -> Void in
+                if (success) {
+                    // The object has been saved.
+                    println("success")
+                    ParseData.brightnessDict = []
+                } else {
+                    // There was a problem, check error.description
+                    println("error")
+                }
+            })
         }
     }
     func checkBrightnessChange () -> Bool {
-        let brightnessDiff =  abs(ParseSetting.preBrightness - UIScreen.mainScreen().brightness)
-        if (brightnessDiff >= 0.2) {
-            ParseSetting.preBrightness = UIScreen.mainScreen().brightness
+        let brightnessDiff =  abs(ParseData.preBrightness - UIScreen.mainScreen().brightness)
+        if (brightnessDiff >= 0.1) {
+            ParseData.preBrightness = UIScreen.mainScreen().brightness
+            let now = NSDate() // 現在日時の取得
+            let dateFormatter = NSDateFormatter()
+            dateFormatter.locale = NSLocale(localeIdentifier: "ja_JP") // ロケールの設定
+            dateFormatter.timeStyle = .LongStyle
+            dateFormatter.dateStyle = .LongStyle
+            println(dateFormatter.stringFromDate(now)) // -> 2014年6月24日 11:14:17 JST
+            let tmpDict: Dictionary<String, String> = ["brightness": UIScreen.mainScreen().brightness.description, "localtime":dateFormatter.stringFromDate(now)]
+            ParseData.brightnessDict.append(tmpDict)
+            println(ParseData.brightnessDict)
             return true
         }
         return false
@@ -91,14 +123,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         self.locManager!.startUpdatingLocation()
     }
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
-        println(newLocation.timestamp)
-        var brightness = UIScreen.mainScreen().brightness
-        println(brightness.description)
-    }
-    
-    func screenBrightnessDidChange(notification:NSNotification){
-        var screen : UIScreen = notification.object as UIScreen
-        self.myLabel.text = screen.brightness.description
+        // println(newLocation.timestamp)
+        saveBrightnessDataInParse()
     }
 
     override func didReceiveMemoryWarning() {
