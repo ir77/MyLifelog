@@ -7,18 +7,15 @@
 //
 
 import UIKit
-import CoreMotion
 import CoreLocation
-import Parse
 
-struct ParseData {
-    static var applicationId : String!
-    static var clientKey : String!
+private struct ParseData {
     static var preBrightness : CGFloat!
     static var brightnessDict : [Dictionary<String, String>]!
+    static var parseObject : MyParse!
 }
 
-class ViewController: UIViewController, CLLocationManagerDelegate {
+class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelegate {
 
     @IBOutlet weak var myLabel: UILabel!
     var locManager: CLLocationManager?
@@ -31,9 +28,9 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         ParseData.preBrightness = brightness
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
         self.myLabel.text = "\(brightness)"
-        setupParse()
+        ParseData.parseObject = MyParse()
+        ParseData.parseObject.delegate = self
         ParseData.brightnessDict = []
-
         self.setupLocationManager()
     }
     func screenBrightnessDidChange(notification:NSNotification){
@@ -41,47 +38,6 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         self.myLabel.text = "\(screen.brightness)"
     }
 
-    // MARK: - Parse
-    func setupParse () -> Bool {
-        var myDict: NSDictionary?
-        if let path = NSBundle.mainBundle().pathForResource("private", ofType: "plist") {
-            myDict = NSDictionary(contentsOfFile: path)
-        }
-        if let dict = myDict {
-            ParseData.applicationId = dict["applicationId"] as String
-            ParseData.clientKey = dict["clientKey"] as String
-            Parse.enableLocalDatastore()
-            Parse.setApplicationId(ParseData.applicationId, clientKey: ParseData.clientKey)
-            return true
-        }
-        return false
-    }
-    func saveBrightnessDataInParse () {
-        if !checkBrightnessChange() {
-            return
-        }
-        
-        if (ParseData.brightnessDict.count >= 1) {
-            var objects : [PFObject] = []
-            for var i=0; i<ParseData.brightnessDict.count; i++ {
-                let pfObject : PFObject = PFObject(className: "TestObject")
-                pfObject["brightness"] = ParseData.brightnessDict[i]["brightness"]
-                pfObject["localtime"] = ParseData.brightnessDict[i]["localtime"]
-                objects.append(pfObject)
-            }
-            PFObject.saveAllInBackground(objects, block: {
-                (success: Bool, error: NSError!) -> Void in
-                if (success) {
-                    // The object has been saved.
-                    println("success")
-                    ParseData.brightnessDict = []
-                } else {
-                    // There was a problem, check error.description
-                    println(error.description)
-                }
-            })
-        }
-    }
     func checkBrightnessChange () -> Bool {
         let brightnessDiff =  abs(ParseData.preBrightness - UIScreen.mainScreen().brightness)
         if (brightnessDiff >= 0.1) {
@@ -113,9 +69,15 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     }
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
         // println(newLocation.timestamp)
-        saveBrightnessDataInParse()
+        if checkBrightnessChange() {
+            ParseData.parseObject.saveBrightnessDataInParse(ParseData.brightnessDict)
+        }
     }
-
+    
+    func saveBackgroundSuccess() -> Void {
+        ParseData.brightnessDict = []
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
