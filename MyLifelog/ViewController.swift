@@ -23,9 +23,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        var brightness = UIScreen.mainScreen().brightness
+        let brightnessCGFloat = UIScreen.mainScreen().brightness
+        let brightnessDouble = Double(brightnessCGFloat)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
-        self.myLabel.text = "\(brightness)"
+        self.myLabel.text = "\(brightnessDouble)"
 
         ParseData.brightnessDict = []
         ParseData.brightnessDict.append(self.getBrightnessDict())
@@ -36,21 +37,25 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         self.setupLocationManager()
     }
     func screenBrightnessDidChange(notification:NSNotification){
-        var screen : UIScreen = notification.object as UIScreen
-        self.myLabel.text = "\(screen.brightness)"
+        let screen : UIScreen = notification.object as UIScreen
+        let brightnessDouble = Double(screen.brightness)
+        self.myLabel.text = "\(brightnessDouble)"
     }
 
     func checkBrightnessChange () {
         let count = ParseData.brightnessDict.count
+        if count == 0 {
+            return
+        }
         let brightnessStr = ParseData.brightnessDict[count-1]["brightness"]
-        let brightnessDiff =  abs(getCGFloatFromString(brightnessStr!) - UIScreen.mainScreen().brightness)
+        let brightnessDiff =  abs(getDoubleFromString(brightnessStr!) - Double(UIScreen.mainScreen().brightness))
         if (brightnessDiff >= 0.1) {
             ParseData.brightnessDict.append(self.getBrightnessDict())
             println(ParseData.brightnessDict)
         } else if brightnessDiff < 0.1 {
             if (ParseData.brightnessDict.count >= 2) {
                 let brightnessStr2 = ParseData.brightnessDict[count-2]["brightness"]
-                let brightnessDiff2 =  abs(getCGFloatFromString(brightnessStr2!) - UIScreen.mainScreen().brightness)
+                let brightnessDiff2 =  abs(getDoubleFromString(brightnessStr2!) - Double(UIScreen.mainScreen().brightness))
                 if brightnessDiff2 < 0.1 {
                     ParseData.brightnessDict[count-1]["localtime"] = getNowDate()
                     println(ParseData.brightnessDict)
@@ -85,8 +90,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         }
     }
     
-    func getCGFloatFromString (str : String) -> CGFloat {
-        return CGFloat(NSNumberFormatter().numberFromString(str)!)
+    func getDoubleFromString (str : String) -> Double {
+        return Double(NSNumberFormatter().numberFromString(str)!)
     }
     
     func getBrightnessDict () -> Dictionary<String, String> {
