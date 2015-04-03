@@ -32,6 +32,9 @@
 		B154E3651ACC17B700CFEA57 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B154E3641ACC17B700CFEA57 /* libz.dylib */; };
 		B154E3671ACC17BE00CFEA57 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B154E3661ACC17BE00CFEA57 /* libsqlite3.dylib */; };
 		B154E3CA1ACC275300CFEA57 /* private.plist in Resources */ = {isa = PBXBuildFile; fileRef = B154E3C91ACC275300CFEA57 /* private.plist */; };
+		B1A1F58B1ACE317300609E67 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1454F2F1AC0386300EEEB2A /* ViewController.swift */; };
+		B1C72AA81ACE2F7900BFFF4C /* Parse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B154E3471ACC171000CFEA57 /* Parse.framework */; };
+		B1DDF4291ACE2ED200A34256 /* MyParse.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13BDD551ACD904C00CDF05F /* MyParse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -105,6 +108,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1C72AA81ACE2F7900BFFF4C /* Parse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -318,7 +322,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1A1F58B1ACE317300609E67 /* ViewController.swift in Sources */,
 				B1454F441AC0386300EEEB2A /* MyLifelogTests.swift in Sources */,
+				B1DDF4291ACE2ED200A34256 /* MyParse.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,6 +470,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/MyLifelog/parse-library-1.7.0",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -483,6 +490,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)/MyLifelog/parse-library-1.7.0",
 				);
 				INFOPLIST_FILE = MyLifelogTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

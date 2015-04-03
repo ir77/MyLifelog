@@ -9,6 +9,8 @@
 import UIKit
 import XCTest
 
+import MyLifelog
+
 class MyLifelogTests: XCTestCase {
     
     override func setUp() {
@@ -33,4 +35,15 @@ class MyLifelogTests: XCTestCase {
         }
     }
     
+    func testViewDidLoad() {
+        let v = ViewController()
+        // assert that the ViewController.view is not nil
+        XCTAssertNotNil(v.view, "View Did Not load")
+    }
+    
+    func testMyParseSaveBrightnessDataInParse() {
+        let parseObject = MyParse()
+        let tmpDict: [Dictionary<String, String>] = [["brightness": UIScreen.mainScreen().brightness.description, "localtime":"test"]]
+        parseObject.saveBrightnessDataInParse(tmpDict)
+    }
 }
