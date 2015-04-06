@@ -103,8 +103,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         let now = NSDate() // 現在日時の取得
         let dateFormatter = NSDateFormatter()
         dateFormatter.locale = NSLocale(localeIdentifier: "ja_JP") // ロケールの設定
-        dateFormatter.timeStyle = .LongStyle
-        dateFormatter.dateStyle = .LongStyle
+        dateFormatter.timeStyle = .MediumStyle
+        dateFormatter.dateStyle = .MediumStyle
         return dateFormatter.stringFromDate(now)
     }
     
