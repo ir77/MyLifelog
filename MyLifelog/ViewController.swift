@@ -28,11 +28,10 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "screenBrightnessDidChange:", name: UIScreenBrightnessDidChangeNotification, object: nil)
         self.myLabel.text = "\(brightnessDouble)"
 
-        ParseData.brightnessDict = []
-        ParseData.brightnessDict.append(self.getBrightnessDict())
-
         ParseData.parseObject = MyParse()
         ParseData.parseObject.delegate = self
+        ParseData.brightnessDict = []
+        ParseData.brightnessDict.append(self.getBrightnessDict())
         
         self.setupLocationManager()
     }
@@ -84,7 +83,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
         println(getNowDate())
         checkBrightnessChange()
-        if ParseData.brightnessDict.count >= 10 {
+        if ParseData.brightnessDict.count >= 100 {
             println(ParseData.brightnessDict)
             ParseData.parseObject.saveBrightnessDataInParse(ParseData.brightnessDict)
         }
@@ -95,7 +94,11 @@ class ViewController: UIViewController, CLLocationManagerDelegate, MyParseDelega
     }
     
     func getBrightnessDict () -> Dictionary<String, String> {
-        let tmpDict: Dictionary<String, String> = ["brightness": UIScreen.mainScreen().brightness.description, "localtime":self.getNowDate()]
+        let brightness = UIScreen.mainScreen().brightness
+        //if brightness > 1.0 {
+        ParseData.parseObject.saveErrorData(brightness)
+        //}
+        let tmpDict: Dictionary<String, String> = ["brightness": "\(brightness)", "localtime":self.getNowDate()]
         return tmpDict
     }
     
