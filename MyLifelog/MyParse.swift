@@ -48,4 +48,21 @@ class MyParse {
             }
         })
     }
+    
+    func saveErrorData (brightness:CGFloat) {
+        var data = PFObject(className:"error")
+        if (brightness > 1.0) {
+            data["error"] = true
+        }
+        data["CGFloat"] = brightness
+        data["Double"] = Double(brightness)
+        data["Double2"] = Double(Int(brightness * 1000.0)) / 1000.0
+        
+        data.saveInBackgroundWithBlock {
+            (success: Bool, error: NSError!) -> Void in
+            if (success) {
+                println("success error save")
+            }
+        }
+    }
 }
